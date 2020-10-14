@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { View, TouchableOpacity, Text,Platform,StyleSheet } from 'react-native'
+import { CommonActions } from "@react-navigation/native";
 import {
     getMetricMetaInfo,
     timeToString,
@@ -71,6 +72,9 @@ class AddEntry extends Component {
         this.setState(() => ({ run: 0, bike: 0, swim: 0, sleep: 0, eat: 0 }))
 
         // Navigate to home
+        this.toHome();
+
+        //save to 'DB'
         submitEntry({ key, entry })
         // Clear local notification
     }
@@ -83,11 +87,21 @@ class AddEntry extends Component {
         }))
 
         // Route to Home
+        this.toHome();
 
         removeEntry(key)
     }
+
+    toHome = () => {
+        this.props.navigation.dispatch(
+          CommonActions.goBack({
+            name: "AddEntry",
+          })
+        );
+      };
     render() {
         const metaInfo = getMetricMetaInfo()
+        console.log("alreadylogged ", this.props.alreadyLogged);
         if (this.props.alreadyLogged) {
             return (
                 <View style={styles.center}>
@@ -181,10 +195,14 @@ function mapStateToProps(state) {
     const key = timeToString()
 
     return {
-        alreadyLogged: state[key] && !state[key].today,
+        alreadyLogged: state[key] && typeof state[key][0].today === "undefined",
     }
 }
 
-export default connect(
-    mapStateToProps
-)(AddEntry) 
+function mapDispatchToProps(dispatch, { navigation }) {
+    return {
+      dispatch,
+      goBack: () => navigation.dispatch(CommonActions.goBack()),
+    };
+  }
+  export default connect(mapStateToProps, mapDispatchToProps)(AddEntry);

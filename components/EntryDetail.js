@@ -8,6 +8,7 @@ import { removeEntry } from "../utils/api";
 import { timeToString, getDailyReminderValue } from "../utils/helpers";
 import AddEntry from "./AddEntry";
 import TextButton from "../components/TextButton";
+import { CommonActions } from "@react-navigation/native";
 
 class EntryDetail extends Component {
   setTitle = (entryId) => {
@@ -76,7 +77,7 @@ function mapDispatchToProps(dispatch, { navigation, route }) {
             entryId === timeToString() ? getDailyReminderValue() : new Array(),
         })
       ),
-    goBack: () => navigation.goBack(),
+      goBack: () => navigation.dispatch(CommonActions.goBack()),
   };
 }
 
