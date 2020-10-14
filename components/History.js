@@ -63,6 +63,7 @@ class History extends Component {
 
         return (
             <UdaciFitnessCalendar
+                style={{ height: 300 }}
                 items={entries}
                 renderItem={this.renderItem}
                 renderEmptyDate={this.renderEmptyDate}
