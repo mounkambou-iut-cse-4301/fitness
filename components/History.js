@@ -13,6 +13,7 @@ import { AppLoading } from "expo"
 class History extends Component {
     state = {
         ready: false,
+        selectedDate: new Date().toISOString().slice(0, 10),
     }
     componentDidMount() {
         const { dispatch } = this.props;
@@ -35,21 +36,28 @@ class History extends Component {
                 }))
             );
     }
-    renderItem = ({ today, ...metrics }, formattedDate, key) => (
+    renderItem = (dateKey, { today, ...metrics }) => (
         <View style={styles.item}>
             {today
                 ? (<View>
                     <Text>{today}</Text>
                 </View>)
-                : ( <TouchableOpacity
+                : (<TouchableOpacity
                     onPress={() =>
-                      this.props.navigation.navigate("EntryDetail", { entryId: key })
+                        this.props.navigation.navigate("EntryDetail", { entryId: dateKey })
                     }
-                  >
+                >
                     <MetricCard metrics={metrics} />
                 </TouchableOpacity>)}
         </View>
     )
+
+    onDayPress = (day) => {
+        this.setState({
+            selectedDate: day.dateString,
+        });
+    };
+
     renderEmptyDate(formattedDate) {
         return (
             <View style={styles.item}>
@@ -59,7 +67,7 @@ class History extends Component {
     }
     render() {
         const { entries } = this.props
-        const { ready } = this.state
+        const { ready, selectedDate } = this.state
 
         if (ready === false) {
             return <AppLoading />
@@ -69,7 +77,11 @@ class History extends Component {
             <UdaciFitnessCalendar
                 style={{ height: 300 }}
                 items={entries}
-                renderItem={this.renderItem}
+                onDayChange={this.onDayPress}
+                onDayPress={this.onDayPress}
+                renderItem={(item, firstItemInDay) =>
+                    this.renderItem(selectedDate, item)
+                }
                 renderEmptyDate={this.renderEmptyDate}
             />
         )
@@ -91,6 +103,11 @@ const styles = StyleSheet.create({
             width: 0,
             height: 3,
         },
+    },
+    noDataText: {
+        fontSize: 20,
+        paddingTop: 20,
+        paddingBottom: 20,
     },
 })
 function mapStateToProps(entries) {
