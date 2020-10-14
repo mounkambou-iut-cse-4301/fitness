@@ -53,6 +53,7 @@ class History extends Component {
     )
 
     onDayPress = (day) => {
+        console.log("day", day);
         this.setState({
             selectedDate: day.dateString,
         });
