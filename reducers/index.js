@@ -1,4 +1,4 @@
-import { RECEIVE_ENTRIES, ADD_ENTRY } from '../actions'
+import { RECEIVE_ENTRIES, ADD_ENTRY, SELECT_DATE } from "../actions/index";
 
 function entries (state = {}, action) {
   switch (action.type) {
