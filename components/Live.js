@@ -8,15 +8,63 @@ import {
 } from "react-native";
 import { Foundation } from "@expo/vector-icons";
 import { purple, white } from "../utils/colors";
+import * as Location from "expo-location";
+import * as Permissions from "expo-permissions";
+import { calculateDirection } from "../utils/helpers";
 
 export default class Live extends Component {
     state = {
         coords: null,
-        status: "granted",
+        status: null,
         direction: "",
     };
+    componentDidMount() {
+        Permissions.getAsync(Permissions.LOCATION)
+            .then(({ status }) => {
+                if (status === "granted") {
+                    return this.setLocation();
+                }
+                this.setState(() => ({ status }));
+            })
+            .catch((error) => {
+                console.warn("Error getting Location permission: ", error);
+                this.setState(() => ({ status: "undetermined" }));
+            });
+    }
+    askPermission = () => {
+        Permissions.askAsync(Permissions.LOCATION)
+            .then(({ status }) => {
+                if (status === "granted") {
+                    return this.setLocation();
+                }
+                this.setState(() => ({ status }));
+            })
+            .catch((error) =>
+                console.warn("Error asking Location permission: ", error)
+            );
+    };
 
-    askPermission = () => { };
+    setLocation = () => {
+        Location.watchPositionAsync(
+            {
+                enableHighAccuracy: 1,
+                timeInterval: 1,
+                distanceInterval: 1,
+            },
+            ({ coords }) => {
+                const newDirection = calculateDirection(coords.heading);
+                const { direction } = this.state;
+
+                this.setState(() => ({
+                    coords,
+                    status: "granted",
+                    direction: newDirection,
+                }));
+            }
+        );
+    };
+
+
     render() {
         const { coords, status, direction } = this.state;
 
@@ -50,20 +98,23 @@ export default class Live extends Component {
 
         return (
             <View style={styles.container}>
-                 <View style={styles.directionContainer}>
-          <Text style={styles.header}>You're heading</Text>
-          <Text style={styles.direction}>East</Text>
-        </View>
-        <View style={styles.metricContainer}>
-          <View style={styles.metric}>
-            <Text style={[styles.header, { color: white }]}>Altitude</Text>
-            <Text style={styles.subHeader}>0 feet</Text>
-          </View>
-          <View style={styles.metric}>
-            <Text style={[styles.header, { color: white }]}>Speed</Text>
-            <Text style={styles.subHeader}>0 feet</Text>
-          </View>
-        </View>
+                <View style={styles.directionContainer}>
+                    <Text style={styles.header}>You're heading</Text>
+                    <Text style={styles.direction}>{direction}</Text>
+                </View>
+                <View style={styles.metricContainer}>
+                    <View style={styles.metric}>
+                        <Text style={[styles.header, { color: white }]}>Altitude</Text>
+                        <Text style={styles.subHeader}>
+                            {" "}
+                            {Math.round(coords.altitude * 3.2808)} Feet
+                        </Text>
+                    </View>
+                    <View style={styles.metric}>
+                        <Text style={[styles.header, { color: white }]}>Speed</Text>
+                        <Text style={styles.subHeader}>{coords.speed.toFixed(1)} KMH</Text>
+                    </View>
+                </View>
             </View>
         );
     }
@@ -95,22 +146,22 @@ const styles = StyleSheet.create({
     directionContainer: {
         flex: 1,
         justifyContent: "center",
-      },
-      header: {
+    },
+    header: {
         fontSize: 35,
         textAlign: "center",
-      },
-      direction: {
+    },
+    direction: {
         color: purple,
         fontSize: 120,
         textAlign: "center",
-      },
-      metricContainer: {
+    },
+    metricContainer: {
         flexDirection: "row",
         justifyContent: "space-around",
         backgroundColor: purple,
-      },
-      metric: {
+    },
+    metric: {
         flex: 1,
         paddingTop: 15,
         paddingBottom: 15,
@@ -119,12 +170,12 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         marginLeft: 10,
         marginRight: 10,
-      },
-      subHeader: {
+    },
+    subHeader: {
         fontSize: 25,
         textAlign: "center",
         marginTop: 5,
         color: white,
-      },
+    },
 });
 
