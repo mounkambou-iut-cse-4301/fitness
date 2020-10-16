@@ -15,6 +15,7 @@ import { orange, white } from "./utils/colors";
 import Constants from "expo-constants";
 import EntryDetail from './components/EntryDetail'
 import Live from "./components/Live"
+import { setLocalNotification } from "./utils/helpers"
 
 
 function UdaciStatusBar({ backgroundColor, ...props }) {
@@ -25,7 +26,7 @@ function UdaciStatusBar({ backgroundColor, ...props }) {
   )
 }
 
-const Tabs =Platform.OS === "ios" ? createBottomTabNavigator() : createMaterialTopTabNavigator();
+const Tabs = Platform.OS === "ios" ? createBottomTabNavigator() : createMaterialTopTabNavigator();
 
 const TabNav = () => (
   <Tabs.Navigator
@@ -37,7 +38,7 @@ const TabNav = () => (
           icon = <FontAwesome name="plus-square" size={size} color={color} />;
         } else if (route.name === "History") {
           icon = <Ionicons name="ios-bookmarks" size={size} color={color} />;
-        }else if (route.name === "Live") {
+        } else if (route.name === "Live") {
           icon = <Ionicons name="ios-speedometer" size={size} color={color} />;
         }
         return icon;
@@ -89,17 +90,22 @@ const MainNav = () => (
 );
 
 
-export default class App extends Component {
-  render() {
-    return (
-      <Provider store={createStore(reducer)}>
-        <View style={{ flex: 1 }}>
-          <NavigationContainer>
+export default function App() {
+  React.useEffect(() => {
+    setLocalNotification();
+  });
+  React.useEffect(() => {
+    setLocalNotification()
+  })
+  return (
+    <Provider store={createStore(reducer)}>
+      <View style={{ flex: 1 }}>
+        <NavigationContainer>
           <UdaciStatusBar backgroundColor={orange} barStyle="light-content" />
           <MainNav />
-          </NavigationContainer>
-        </View>
-      </Provider>
-    )
-  }
+        </NavigationContainer>
+      </View>
+    </Provider>
+  )
+
 }
